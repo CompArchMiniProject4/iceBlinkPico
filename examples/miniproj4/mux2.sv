@@ -1,4 +1,4 @@
-module mux2_32 (
+module mux2(
     input  logic [31:0] a,   
     input  logic [31:0] b,   
     input  logic        sel, // control signal
