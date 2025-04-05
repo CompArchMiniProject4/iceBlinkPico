@@ -1,4 +1,4 @@
-module controller (
+module Controller (
     input  logic        clk,
     input  logic        reset,
     input  logic [6:0]  opcode,     // From instruction[6:0]
