@@ -1,4 +1,4 @@
-module imm_gen (
+module extend (
     input  logic [31:0] instr,
     output logic [31:0] imm_out
 );
