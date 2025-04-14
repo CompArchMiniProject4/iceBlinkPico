@@ -1,10 +1,7 @@
-module mux4(
-    input  logic [31:0] a,   
-    input  logic [31:0] b,   
-    input  logic [31:0] c,   
-    input  logic [31:0] d,   
-    input  logic [1:0]  sel, 
-    output logic [31:0] out
+module mux4 #(parameter WIDTH = 32) (
+    input  logic [WIDTH-1:0] a, b, c, d,
+    input  logic [1:0]       sel,
+    output logic [WIDTH-1:0] out
 );
     always_comb begin
         case (sel)
