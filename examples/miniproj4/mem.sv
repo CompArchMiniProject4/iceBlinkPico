@@ -19,7 +19,7 @@
 // started (0xFFFFFFF8, R), and a running timer that counts the number of 
 // microseconds (mod 2^32) since the processor started (0xFFFFFFF4, R).
 
-module mem #(
+module memory #(
     parameter INIT_FILE = ""
 )(
     input logic     clk, 
