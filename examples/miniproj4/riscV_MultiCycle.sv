@@ -1,4 +1,4 @@
-module riscV_MultiCycle (input logic clk, reset,
+module rVMultiCycle (input logic clk, reset,
                          input logic [31:0] ReadData,
                          output logic [31:0] Adr,
                          output logic MemWrite,
