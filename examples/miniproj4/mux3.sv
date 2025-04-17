@@ -1,14 +1,14 @@
 module mux3 #(parameter WIDTH = 32) (
-    input  logic [WIDTH-1:0] a, b, c,
-    input  logic [1:0]       sel,
+    input  logic [WIDTH-1:0] in0, in1, in2,
+    input  logic [1:0] sel,
     output logic [WIDTH-1:0] out
 );
     always_comb begin
         case (sel)
-            2'b00: out = a;
-            2'b01: out = b;
-            2'b10: out = c;
-            default: out = {WIDTH{1'b0}};  // Zero-pad for safety
+            2'b00: out = in0;
+            2'b01: out = in1;
+            2'b10: out = in2;
+            default: out = '0;
         endcase
     end
 endmodule

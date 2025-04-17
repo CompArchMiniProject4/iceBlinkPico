@@ -1,9 +1,11 @@
 
 module top(input  logic        clk, reset, 
+           input  logic [2:0]  funct3,
            output logic [31:0] WriteData, DataAdr, 
            output logic        MemWrite,
            output logic [3:0]  leds,
-           output logic [31:0] pwm_out);
+           output logic [31:0] pwm_out
+          );
 
   logic [31:0] ReadData;
 

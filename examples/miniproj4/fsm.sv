@@ -14,12 +14,10 @@ module fsm (
 
     statetype state, nextstate;
 
-    // Extract op bits to avoid Icarus issues
     logic op5, op6;
     assign op5 = op[5];
     assign op6 = op[6];
 
-    // State register
     always_ff @(posedge clk, posedge rst) begin
         if (rst)
             state <= s0;
@@ -27,11 +25,9 @@ module fsm (
             state <= nextstate;
     end
 
-    // Next-state logic
     always_comb begin
         case (state)
             s0: nextstate = s1;
-
             s1: case (op)
                 7'b0110011: nextstate = s6;
                 7'b0010011: nextstate = s8;
@@ -44,7 +40,6 @@ module fsm (
                 7'b0110111: nextstate = s12;
                 default:    nextstate = s13;
             endcase
-
             s2: nextstate = (op5 ? (op6 ? s9 : s5) : s3);
             s3: nextstate = s4;
             s4: nextstate = s0;
@@ -60,17 +55,16 @@ module fsm (
         endcase
     end
 
-    // Output logic
     always_comb begin
-        branch = 1'b0;
-        pcupdate = 1'b0;
-        regwrite = 1'b0;
-        memwrite = 1'b0;
-        irwrite = 1'b0;
+        branch = 0;
+        pcupdate = 0;
+        regwrite = 0;
+        memwrite = 0;
+        irwrite = 0;
         resultsrc = 2'b00;
         alusrcb = 2'b00;
         alusrca = 2'b00;
-        adrsrc = 1'b0;
+        adrsrc = 0;
         aluop = 2'b00;
 
         case (state)
@@ -87,11 +81,7 @@ module fsm (
             s10: begin branch = 1; alusrca = 2'b10; aluop = 2'b01; end
             s11: begin alusrcb = 2'b01; alusrca = 2'b01; end
             s12: begin regwrite = 1; resultsrc = 2'b11; end
-            s13: begin
-                branch = 1'bx; pcupdate = 1'bx; regwrite = 1'bx;
-                memwrite = 1'bx; irwrite = 1'bx; resultsrc = 2'bx;
-                alusrcb = 2'bx; alusrca = 2'bx; adrsrc = 1'bx; aluop = 2'bx;
-            end
+            s13: begin end // Trap state - safe default values used above
         endcase
     end
 
