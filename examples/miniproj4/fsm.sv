@@ -49,7 +49,6 @@ module fsm (
     end
 
     always_comb begin
-        // Default values
         branch    = 0;
         pcupdate  = 0;
         regwrite  = 0;
