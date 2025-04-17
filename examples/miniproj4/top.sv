@@ -1,15 +1,38 @@
+module top (
+    input  logic        clk, reset,
+    output logic [31:0] WriteData,
+    output logic [31:0] DataAdr,
+    output logic        MemWrite,
+    output logic [3:0]  leds,
+    output logic [31:0] pwm_out
+);
 
-module top(input  logic        clk, reset, 
-           input  logic [2:0]  funct3,
-           output logic [31:0] WriteData, DataAdr, 
-           output logic        MemWrite,
-           output logic [3:0]  leds,
-           output logic [31:0] pwm_out
-          );
+    logic [31:0] ReadData;
 
-  logic [31:0] ReadData;
+    rVMultiCycle rvMultiCycle (
+        .clk(clk),
+        .reset(reset),
+        .ReadData(ReadData),
+        .Adr(DataAdr),
+        .MemWrite(MemWrite),
+        .WriteData(WriteData)
+    );
 
-  rVMultiCycle rvMultiCycle(clk, reset, ReadData, DataAdr, MemWrite, WriteData);
-  memory memory(clk, MemWrite, DataAdr, WriteData, ReadData, leds, pwm_out);
+    // memory module
+    memory memory (
+        .clk(clk),
+        .write_mem(MemWrite),
+        .funct3(3'b010),  
+        .write_address(DataAdr),
+        .write_data(WriteData),
+        .read_address(DataAdr),
+        .read_data(ReadData),
+        .led(leds[0]),
+        .red(leds[1]),
+        .green(leds[2]),
+        .blue(leds[3])
+    );
 
+  assign pwm_out = {leds, 28'd0}; // placeholder
 endmodule
+

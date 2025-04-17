@@ -16,42 +16,40 @@ module dataPath (
     output logic [31:0] instr
 );
 
-		 
 logic [31:0] Result , ALUOut, ALUResult;
 logic [31:0] RD1, RD2, A , SrcA, SrcB, Data;
 logic [31:0] ImmExt;
 logic [31:0] PC, OldPC;
 logic [31:0] aligned_address;
 
-
-//pc
+// PC register
 flopenr #(32) pcFlop(clk, reset, PCWrite, Result, PC);
 
-
-//regFile
+// Register file
 register_file rf(clk, RegWrite, instr[19:15], instr[24:20], instr[11:7], Result, RD1, RD2); 
 extend ext(instr[31:7], ImmSrc, ImmExt);
 flopr #(32) regF( clk, reset, RD1, A);
 flopr #(32) regF_2( clk, reset, RD2, WriteData);
 
-
-//alu
+// ALU path
 mux3 #(32) srcAmux(PC, OldPC, A, ALUSrcA, SrcA);
 mux3 #(32) srcBmux(WriteData, ImmExt, 32'd4, ALUSrcB, SrcB);
 alu alu(SrcA, SrcB, ALUControl, ALUResult, Zero, cout, overflow, sign);
 flopr #(32) aluReg (clk, reset, ALUResult, ALUOut);
-mux4 #(32) resultMux(ALUOut, Data, ALUResult, ImmExt, ResultSrc, Result );
+mux4 #(32) resultMux(ALUOut, Data, ALUResult, ImmExt, ResultSrc, Result);
 
-//mem
+// Memory path
 mux2 #(32) adrMux(PC, Result, AdrSrc, Adr);
 flopenr #(32) memFlop1(clk, reset, IRWrite, PC, OldPC); 
 flopenr #(32) memFlop2(clk, reset, IRWrite, ReadData, instr);
 flopr #(32) memDataFlop(clk, reset, ReadData, Data);
 
+// Aligned memory address
 assign aligned_address = 
-        (memwrite && instr[14:12] == 3'b010) ? {aluout[31:2], 2'b00} :  
-        (memwrite && instr[14:12] == 3'b001) ? {aluout[31:1], 1'b0} : 
-        aluout;
+        (memwrite && instr[14:12] == 3'b010) ? {ALUOut[31:2], 2'b00} :  
+        (memwrite && instr[14:12] == 3'b001) ? {ALUOut[31:1], 1'b0} : 
+        ALUOut;
 
-    assign aluout = aligned_address;
+// Removed: assign aluout = aligned_address;
+
 endmodule
