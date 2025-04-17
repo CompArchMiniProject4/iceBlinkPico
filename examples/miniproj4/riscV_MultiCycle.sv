@@ -41,6 +41,7 @@ module rVMultiCycle (
   dataPath dp(
     .clk(clk),
     .reset(reset),
+    .memwrite(MemWrite),       // Add memwrite connection
     .ImmSrc(ImmSrc),
     .ALUControl(alucontrol),
     .ResultSrc(ResultSrc),
