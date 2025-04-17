@@ -39,7 +39,12 @@ flopr #(32) aluReg (clk, reset, ALUResult, ALUOut);
 mux4 #(32) resultMux(ALUOut, Data, ALUResult, ImmExt, ResultSrc, Result);
 
 // Memory path
-mux2 #(32) adrMux(PC, Result, AdrSrc, Adr);
+mux2 #(32) adrMux (
+    .a(PC),
+    .b(Result),
+    .sel(AdrSrc),
+    .out(Adr)
+);
 flopenr #(32) memFlop1(clk, reset, IRWrite, PC, OldPC); 
 flopenr #(32) memFlop2(clk, reset, IRWrite, ReadData, instr);
 flopr #(32) memDataFlop(clk, reset, ReadData, Data);
