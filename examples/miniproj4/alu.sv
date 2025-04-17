@@ -8,9 +8,10 @@ module alu (
     logic [4:0] shamt;
     assign shamt = src2[4:0];
 
-    logic [31:0] shl_out = src1 << shamt;
-    logic [31:0] shr_out = src1 >> shamt;
-    logic [31:0] sar_out = $signed(src1) >>> shamt;
+    logic [31:0] shl_out, shr_out, sar_out;
+    assign shl_out = src1 << shamt;
+    assign shr_out = src1 >> shamt;
+    assign sar_out = $signed(src1) >>> shamt;
 
     always_comb begin
         case (aluc)
