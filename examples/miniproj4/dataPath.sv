@@ -1,17 +1,20 @@
-module dataPath (input logic clk, reset,
-					  input logic [2:0] ImmSrc, 
-					  input logic [3:0] ALUControl, 
-					  input logic [1:0] ResultSrc, 
-					  input logic IRWrite,
-					  input logic RegWrite,
-					  input logic [1:0] ALUSrcA, ALUSrcB, 
-					  input logic AdrSrc, 
-					  input logic PCWrite,  
-					  input logic [31:0] ReadData,
-					  output logic Zero, cout, overflow, sign, 
-					  output logic [31:0] Adr, 
-					  output logic [31:0] WriteData,
-					  output logic [31:0] instr);
+module dataPath (
+    input logic clk, reset,
+    input logic [2:0] ImmSrc, 
+    input logic [3:0] ALUControl, 
+    input logic [1:0] ResultSrc, 
+    input logic IRWrite,
+    input logic RegWrite,
+    input logic [1:0] ALUSrcA, ALUSrcB, 
+    input logic AdrSrc, 
+    input logic PCWrite,  
+    input logic [31:0] ReadData,
+    input logic memwrite,  
+    output logic Zero, cout, overflow, sign, 
+    output logic [31:0] Adr, 
+    output logic [31:0] WriteData,
+    output logic [31:0] instr
+);
 
 		 
 logic [31:0] Result , ALUOut, ALUResult;
@@ -46,10 +49,9 @@ flopenr #(32) memFlop2(clk, reset, IRWrite, ReadData, instr);
 flopr #(32) memDataFlop(clk, reset, ReadData, Data);
 
 assign aligned_address = 
-    (memwrite && funct3 == 3'b010) ? {aluout[31:2], 2'b00} : // lw/sw
-    (memwrite && funct3 == 3'b001) ? {aluout[31:1], 1'b0} :   // lh/sh
-    aluout;                                                   // lb/sb
+        (memwrite && instr[14:12] == 3'b010) ? {aluout[31:2], 2'b00} :  
+        (memwrite && instr[14:12] == 3'b001) ? {aluout[31:1], 1'b0} : 
+        aluout;
 
-assign aluout = aligned_address;
-
+    assign aluout = aligned_address;
 endmodule
