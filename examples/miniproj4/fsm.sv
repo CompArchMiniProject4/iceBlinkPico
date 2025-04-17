@@ -42,46 +42,40 @@ module fsm (
             endcase
             s2: nextstate = (op5 ? (op6 ? s9 : s5) : s3);
             s3: nextstate = s4;
-            s4: nextstate = s0;
-            s5: nextstate = s0;
-            s6: nextstate = s7;
-            s7: nextstate = s0;
-            s8: nextstate = s7;
-            s9: nextstate = s7;
-            s10: nextstate = s0;
-            s11: nextstate = s7;
-            s12: nextstate = s0;
+            s4, s5, s7, s0, s10, s12: nextstate = s0;
+            s6, s8, s9, s11: nextstate = s7;
             s13: nextstate = s13;
         endcase
     end
 
     always_comb begin
-        branch = 0;
-        pcupdate = 0;
-        regwrite = 0;
-        memwrite = 0;
-        irwrite = 0;
-        resultsrc = 2'b00;
-        alusrcb = 2'b00;
-        alusrca = 2'b00;
-        adrsrc = 0;
-        aluop = 2'b00;
+        // Default values
+        branch    = 0;
+        pcupdate  = 0;
+        regwrite  = 0;
+        memwrite  = 0;
+        irwrite   = 0;
+        resultsrc = logic'(2'b00);
+        alusrcb   = logic'(2'b00);
+        alusrca   = logic'(2'b00);
+        adrsrc    = 0;
+        aluop     = logic'(2'b00);
 
         case (state)
-            s0: begin pcupdate = 1; irwrite = 1; resultsrc = 2'b10; alusrcb = 2'b10; end
-            s1: begin alusrcb = 2'b01; alusrca = 2'b01; end
-            s2: begin alusrcb = 2'b01; alusrca = 2'b10; end
+            s0: begin pcupdate = 1; irwrite = 1; resultsrc = logic'(2'b10); alusrcb = logic'(2'b10); end
+            s1: begin alusrcb = logic'(2'b01); alusrca = logic'(2'b01); end
+            s2: begin alusrcb = logic'(2'b01); alusrca = logic'(2'b10); end
             s3: begin adrsrc = 1; end
-            s4: begin regwrite = 1; resultsrc = 2'b01; end
+            s4: begin regwrite = 1; resultsrc = logic'(2'b01); end
             s5: begin memwrite = 1; adrsrc = 1; end
-            s6: begin alusrca = 2'b10; aluop = 2'b10; end
+            s6: begin alusrca = logic'(2'b10); aluop = logic'(2'b10); end
             s7: begin regwrite = 1; end
-            s8: begin alusrcb = 2'b01; alusrca = 2'b10; aluop = 2'b10; end
-            s9: begin pcupdate = 1; alusrcb = 2'b10; alusrca = 2'b01; end
-            s10: begin branch = 1; alusrca = 2'b10; aluop = 2'b01; end
-            s11: begin alusrcb = 2'b01; alusrca = 2'b01; end
-            s12: begin regwrite = 1; resultsrc = 2'b11; end
-            s13: begin end // Trap state - safe default values used above
+            s8: begin alusrcb = logic'(2'b01); alusrca = logic'(2'b10); aluop = logic'(2'b10); end
+            s9: begin pcupdate = 1; alusrcb = logic'(2'b10); alusrca = logic'(2'b01); end
+            s10: begin branch = 1; alusrca = logic'(2'b10); aluop = logic'(2'b01); end
+            s11: begin alusrcb = logic'(2'b01); alusrca = logic'(2'b01); end
+            s12: begin regwrite = 1; resultsrc = logic'(2'b11); end
+            default: /* s13 */ begin end
         endcase
     end
 
