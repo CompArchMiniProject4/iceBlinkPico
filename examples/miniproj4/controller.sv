@@ -1,7 +1,5 @@
 `include "fsm.sv"
 `include "aluDec.sv"
-`include "instrDec.sv"
-`include "branchDec.sv"
 
 module controller(input logic clk,
 						input logic reset,
