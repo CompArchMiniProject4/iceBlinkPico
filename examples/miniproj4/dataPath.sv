@@ -27,7 +27,7 @@ flopenr #(32) pcFlop(clk, reset, PCWrite, Result, PC);
 
 // Register file
 register_file rf(clk, RegWrite, instr[19:15], instr[24:20], instr[11:7], Result, RD1, RD2); 
-extend ext(instr[31:7], ImmSrc, ImmExt);
+extend ext({7'b0, instr[31:7]}, ImmExt);
 flopr #(32) regF( clk, reset, RD1, A);
 flopr #(32) regF_2( clk, reset, RD2, WriteData);
 
