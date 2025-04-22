@@ -41,7 +41,6 @@ module rVMultiCycle (
   dataPath dp(
     .clk(clk),
     .reset(reset),
-    .ImmSrc(ImmSrc),
     .ALUControl(alucontrol),
     .ResultSrc(ResultSrc),
     .IRWrite(irwrite),
