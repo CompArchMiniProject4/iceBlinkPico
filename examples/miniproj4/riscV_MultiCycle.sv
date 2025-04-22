@@ -1,3 +1,6 @@
+`include "controller.sv"
+`include "dataPath.sv"
+
 module rVMultiCycle (
   input  logic        clk, reset,
   input  logic [31:0] ReadData,
