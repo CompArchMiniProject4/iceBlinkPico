@@ -1,8 +1,8 @@
 
-module extend (input logic [31:7] instr, input logic [2:0] immsrc, output logic [31:0] ImmExt);
+module extend (input logic [31:7] instr, input logic [2:0] ImmSrc, output logic [31:0] ImmExt);
 
 	always_comb begin
-		case(immsrc) //controller produces immsrc signal
+		case(ImmSrc) //controller produces immsrc signal
 			//I
 			3'b000: ImmExt = {{20{instr[31]}}, instr[31:20]};
 			//S
