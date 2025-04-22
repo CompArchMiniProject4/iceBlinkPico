@@ -26,7 +26,7 @@ module tb();
     #20 reset = 0;
     $dumpfile("tb.vcd");
     $dumpvars(0, dut);
-    #10000
+    #1000000
     $finish;
   end
 
