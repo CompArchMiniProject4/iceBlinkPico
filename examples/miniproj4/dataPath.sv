@@ -1,3 +1,14 @@
+`include "flopenr.sv"
+`include "reg.sv"
+`include "instrDec.sv"
+`include "branchDec.sv"
+`include "flopr.sv"
+`include "mux2.sv"
+`include "mux3.sv"
+`include "mux4.sv"
+`include "alu.sv"
+`include "imm_gen.sv"
+
 module dataPath (
     input logic clk, reset,
     input logic [3:0] ALUControl, 
