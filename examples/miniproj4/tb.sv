@@ -1,5 +1,7 @@
-module tb();
+`timescale 10ns/10ns
+`include "top.sv"
 
+module tb();
   logic clk; 
   logic reset;
   logic [31:0] WriteData, DataAdr;  
@@ -7,7 +9,6 @@ module tb();
   logic [3:0] leds;
   logic [31:0] pwm_out;
 
-  // Instantiate 'top' with all 7 ports
   top dut(
     .clk(clk),
     .reset(reset),
@@ -20,11 +21,18 @@ module tb();
 
   
   initial begin 
-    reset <= 1; # 22; reset <= 0;
+    clk = 0;
+    reset = 1;
+    #20 reset = 0;
+    $dumpfile("tb.vcd");
+    $dumpvars(0, dut);
+    #10000
+    $finish;
   end
 
   always begin 
-    clk <= 1; # 5; clk <= 0; # 5;
+    #4
+    clk = ~clk;
   end
 
   always @(negedge clk) begin
@@ -38,4 +46,5 @@ module tb();
       end
     end
   end
+
 endmodule
