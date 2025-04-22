@@ -20,7 +20,7 @@
 // microseconds (mod 2^32) since the processor started (0xFFFFFFF4, R).
 
 module memory #(
-    parameter INIT_FILE = ""
+    parameter INIT_FILE = "tb_test"
 )(
     input logic     clk, 
     input logic     write_mem, 
