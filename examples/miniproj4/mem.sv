@@ -382,7 +382,7 @@ module memory_array #(
     output logic    [7:0] read_data
 );
 
-    logic [7:0] memory [0:2047];
+    logic [7:0] memory [0:44];
 
     int i;
 
@@ -392,7 +392,7 @@ module memory_array #(
             $readmemh(INIT_FILE, memory);
         end
         else begin
-            for (i = 0; i < 2048; i++) begin
+            for (i = 0; i < 45; i++) begin
                 memory[i] <= 8'd0;
             end
         end
