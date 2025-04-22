@@ -1,6 +1,5 @@
 module dataPath (
     input logic clk, reset,
-    input logic [2:0] ImmSrc, 
     input logic [3:0] ALUControl, 
     input logic [1:0] ResultSrc, 
     input logic IRWrite,
