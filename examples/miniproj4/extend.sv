@@ -1,7 +1,7 @@
 
 module extend (input logic [31:7] instr, input logic [2:0] immsrc, output logic [31:0] immext);
 
-	always_comb
+	always_comb begin
 		case(immsrc) //controller produces immsrc signal
 			//I
 			3'b000: immext = {{20{instr[31]}}, instr[31:20]};
@@ -15,4 +15,5 @@ module extend (input logic [31:7] instr, input logic [2:0] immsrc, output logic 
 			3'b100: immext = {instr[31:12], 12'b0};
 			default: immext = 32'bx; // undefined ? ?
 		endcase
+	end
 endmodule 
