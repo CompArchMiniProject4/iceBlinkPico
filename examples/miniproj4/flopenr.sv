@@ -1,10 +1,17 @@
 // for initial datapath file
 
-module flopenr #(parameter WIDTH = 8)
-    (input logic clk, reset, en,
-    input logic [WIDTH-1:0] d, // Corrected hyphen
-    output logic [WIDTH-1:0] q); // Corrected hyphen
-  always_ff @(posedge clk, posedge reset)
-    if (reset) q <= 0;
-    else if (en) q <= d;
+module flopenr #(parameter WIDTH = 8) (
+    input  logic             clk,   // Clock input
+    input  logic             reset, // Asynchronous reset (active-high)
+    input  logic             en,    // Enable input (active-high)
+    input  logic [WIDTH-1:0] d,     // Data input
+    output logic [WIDTH-1:0] q      // Data output
+);
+
+    always_ff @(posedge clk, posedge reset) begin
+        if (reset)  q <= '0;         // Async reset to all zeros
+        else if (en) q <= d;         // Update on enable
+        // No else: retains value when not enabled
+    end
+
 endmodule

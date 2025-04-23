@@ -1,4 +1,4 @@
-`timescale 10ns/10ns
+`timescale 1ns/1ns
 `include "top.sv"
 
 module tb();
@@ -8,6 +8,7 @@ module tb();
   logic MemWrite;
   logic [3:0] leds;
   logic [31:0] pwm_out;
+  logic error_flag = 0;
 
   top dut(
     .clk(clk),
@@ -19,30 +20,34 @@ module tb();
     .pwm_out(pwm_out)
   );
 
-  
   initial begin 
     clk = 0;
     reset = 1;
     #20 reset = 0;
     $dumpfile("tb.vcd");
-    $dumpvars(0, dut);
-    #1000000
+    $dumpvars(0, tb);
+    #2000000  // 2 million time units = 2ms simulation
+    if(!error_flag) begin
+      $display("Simulation succeeded: No errors detected");
+      $display("Final LED state: %b", leds);
+    end
     $finish;
   end
 
-  always begin 
-    #4
-    clk = ~clk;
-  end
+  always #5 clk = ~clk;  // 10ns period (100 MHz)
 
   always @(negedge clk) begin
-    if(MemWrite) begin 
-      if(DataAdr == 252 & WriteData == 32'h00001000) begin
-        $display("Simulation succeeded"); 
-        $stop;
-      end else begin 
-        $display("Simulation failed"); 
-        $stop;
+    if(MemWrite) begin
+      if(DataAdr === 252) begin
+        if(WriteData === 0) begin
+          $display("ERROR: Test failed at time %0t", $time);
+          error_flag = 1;
+        end
+        else begin
+          $display("Unexpected write to address 252: %h", WriteData);
+          error_flag = 1;
+        end
+        $finish;
       end
     end
   end

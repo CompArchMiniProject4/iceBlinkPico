@@ -6,28 +6,31 @@ module rVMultiCycle (
   input  logic [31:0] ReadData,
   output logic [31:0] Adr,
   output logic        MemWrite,
-  output logic [31:0] WriteData
+  output logic [31:0] WriteData,
+  output logic [2:0]  funct3
 );
 
-  // Declare missing signals for controller and dataPath
+  // Internal signals
   logic [1:0] ALUSrcA, ALUSrcB, ResultSrc;
   logic [2:0] ImmSrc;
   logic [3:0] alucontrol;
   logic       adrSrc, irwrite, pcwrite, regwrite;
-  logic       Zero, cout, overflow, sign;  // Added missing flags
+  logic       Zero, cout, overflow, sign;
   logic [31:0] Instr;
 
-  // Corrected controller instantiation (now 19 ports)
+  // Connect funct3 directly from instruction register
+  assign funct3 = Instr[14:12];
+
   controller c(
     .clk(clk),
     .reset(reset),
-    .op(Instr[6:0]),           // From dataPath's Instr output
-    .funct3(Instr[14:12]),     // From dataPath's Instr output
-    .funct7b5(Instr[30]),      // From dataPath's Instr output
-    .zero(Zero),               // From dataPath
-    .cout(cout),               // From dataPath (newly added)
-    .overflow(overflow),       // From dataPath (newly added)
-    .sign(sign),               // From dataPath (newly added)
+    .op(Instr[6:0]),
+    .funct3(Instr[14:12]),  // Single connection
+    .funct7b5(Instr[30]),
+    .zero(Zero),
+    .cout(cout),
+    .overflow(overflow),
+    .sign(sign),
     .immsrc(ImmSrc),
     .alusrca(ALUSrcA),
     .alusrcb(ALUSrcB),
@@ -40,7 +43,6 @@ module rVMultiCycle (
     .memwrite(MemWrite)
   );
 
-  // Corrected dataPath instantiation (now 19 ports)
   dataPath dp(
     .clk(clk),
     .reset(reset),
@@ -50,17 +52,18 @@ module rVMultiCycle (
     .RegWrite(regwrite),
     .ALUSrcA(ALUSrcA),
     .ALUSrcB(ALUSrcB),
+    .ImmSrc(ImmSrc),
     .AdrSrc(adrSrc),
     .PCWrite(pcwrite),
     .ReadData(ReadData),
-    .memwrite(MemWrite),       
-    .Zero(Zero),               // To controller
-    .cout(cout),               // To controller (newly added)
-    .overflow(overflow),       // To controller (newly added)
-    .sign(sign),               // To controller (newly added)
+    .memwrite(MemWrite),
+    .Zero(Zero),
+    .cout(cout),
+    .overflow(overflow),
+    .sign(sign),
     .Adr(Adr),
     .WriteData(WriteData),
-    .instr(Instr)              // Connects to controller's op/funct3/funct7b5
+    .instr(Instr)
   );
 
 endmodule

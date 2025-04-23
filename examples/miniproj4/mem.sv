@@ -94,9 +94,24 @@ module memory #(
     logic [7:0] mem_read_data2;
     logic [7:0] mem_read_data3;
 
-    // Instaniate memory arrays
+    // Declare instruction memory array
+    logic [31:0] mem_array [0:255];
+
+    // Initialize instruction memory with test program
+    initial begin
+        // Initialize all memory to zero first
+        foreach (mem_array[i]) mem_array[i] = 32'd0;
+        
+        // Load test program if specified
+        if (INIT_FILE != "") begin
+            $readmemh({INIT_FILE, ".hex"}, mem_array);
+        end
+    end
+
+    // Instantiate memory arrays with proper initialization
     memory_array #(
-        .INIT_FILE      ((INIT_FILE != "") ? {INIT_FILE, "0.txt"} : "")
+        .INIT_FILE      ((INIT_FILE != "") ? {INIT_FILE, "0.txt"} : ""),
+        .MEM_SIZE       (45)
     ) mem0 (
         .clk            (clk), 
         .write_enable   (mem_write_enable0), 
@@ -108,7 +123,8 @@ module memory #(
     );
 
     memory_array #(
-        .INIT_FILE      ((INIT_FILE != "") ? {INIT_FILE, "1.txt"} : "")
+        .INIT_FILE      ((INIT_FILE != "") ? {INIT_FILE, "1.txt"} : ""),
+        .MEM_SIZE       (45)
     ) mem1 (
         .clk            (clk), 
         .write_enable   (mem_write_enable1), 
@@ -120,7 +136,8 @@ module memory #(
     );
 
     memory_array #(
-        .INIT_FILE      ((INIT_FILE != "") ? {INIT_FILE, "2.txt"} : "")
+        .INIT_FILE      ((INIT_FILE != "") ? {INIT_FILE, "2.txt"} : ""),
+        .MEM_SIZE       (45)
     ) mem2 (
         .clk            (clk), 
         .write_enable   (mem_write_enable2), 
@@ -132,7 +149,8 @@ module memory #(
     );
 
     memory_array #(
-        .INIT_FILE      ((INIT_FILE != "") ? {INIT_FILE, "3.txt"} : "")
+        .INIT_FILE      ((INIT_FILE != "") ? {INIT_FILE, "3.txt"} : ""),
+        .MEM_SIZE       (45)
     ) mem3 (
         .clk            (clk), 
         .write_enable   (mem_write_enable3), 
@@ -371,7 +389,8 @@ module memory #(
 endmodule
 
 module memory_array #(
-    parameter INIT_FILE = ""
+    parameter INIT_FILE = "",
+    parameter MEM_SIZE = 45
 )(
     input logic     clk, 
     input logic     write_enable, 
@@ -382,19 +401,18 @@ module memory_array #(
     output logic    [7:0] read_data
 );
 
-    logic [7:0] memory [0:44];
-
-    int i;
+    logic [7:0] memory [0:MEM_SIZE-1];
 
     // Initialize memory array
     initial begin
-        if (INIT_FILE) begin
-            $readmemh(INIT_FILE, memory);
+        // Initialize all to zero first
+        for (int i = 0; i < MEM_SIZE; i++) begin
+            memory[i] = 8'd0;
         end
-        else begin
-            for (i = 0; i < 45; i++) begin
-                memory[i] <= 8'd0;
-            end
+        
+        // Load initialization file if specified
+        if (INIT_FILE != "") begin
+            $readmemh(INIT_FILE, memory);
         end
     end
 

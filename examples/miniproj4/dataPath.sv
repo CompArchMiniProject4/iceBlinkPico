@@ -1,70 +1,130 @@
 `include "flopenr.sv"
-`include "reg.sv"
-`include "instrDec.sv"
-`include "branchDec.sv"
 `include "flopr.sv"
 `include "mux2.sv"
 `include "mux3.sv"
 `include "mux4.sv"
 `include "alu.sv"
 `include "imm_gen.sv"
+`include "reg.sv"
 
 module dataPath (
-    input logic clk, reset,
-    input logic [3:0] ALUControl, 
-    input logic [1:0] ResultSrc, 
-    input logic IRWrite,
-    input logic RegWrite,
-    input logic [1:0] ALUSrcA, ALUSrcB, 
-    input logic AdrSrc, 
-    input logic PCWrite,  
-    input logic [31:0] ReadData,
-    input logic memwrite,  
-    output logic Zero, cout, overflow, sign, 
-    output logic [31:0] Adr, 
+    input  logic        clk, reset,
+    input  logic [3:0]  ALUControl,
+    input  logic [1:0]  ResultSrc,
+    input  logic        IRWrite,
+    input  logic        RegWrite,
+    input  logic [1:0]  ALUSrcA, ALUSrcB,
+    input  logic        AdrSrc,
+    input  logic        PCWrite,
+    input  logic [2:0]  ImmSrc,
+    input  logic [31:0] ReadData,
+    input  logic        memwrite,
+    output logic        Zero, cout, overflow, sign,
+    output logic [31:0] Adr,
     output logic [31:0] WriteData,
     output logic [31:0] instr
 );
 
-logic [31:0] Result , ALUOut, ALUResult;
-logic [31:0] RD1, RD2, A , SrcA, SrcB, Data;
-logic [31:0] ImmExt;
-logic [31:0] PC, OldPC;
-logic [31:0] aligned_address;
+    // Internal wires/regs
+    logic [31:0] Result, ALUOut, ALUResult;
+    logic [31:0] RD1, RD2, A, SrcA, SrcB, Data;
+    logic [31:0] ImmExt;
+    logic [31:0] PC, OldPC;
+    logic [31:0] aligned_address;
+    logic [2:0]  funct3; // <-- Used instead of instr[14:12]
 
-// PC register
-flopenr #(32) pcFlop(clk, reset, PCWrite, Result, PC);
+    // Extract instr[14:12] safely outside procedural block
+    assign funct3 = instr[14:12];
 
-// Register file
-register_file rf(clk, RegWrite, instr[19:15], instr[24:20], instr[11:7], Result, RD1, RD2); 
-extend ext({7'b0, instr[31:7]}, ImmExt);
-flopr #(32) regF( clk, reset, RD1, A);
-flopr #(32) regF_2( clk, reset, RD2, WriteData);
+    // PC register
+    flopenr #(32) pcFlop(clk, reset, PCWrite, Result, PC);
 
-// ALU path
-mux3 #(32) srcAmux(PC, OldPC, A, ALUSrcA, SrcA);
-mux3 #(32) srcBmux(WriteData, ImmExt, 32'd4, ALUSrcB, SrcB);
-alu alu(SrcA, SrcB, ALUControl, ALUResult, Zero, cout, overflow, sign);
-flopr #(32) aluReg (clk, reset, ALUResult, ALUOut);
-mux4 #(32) resultMux(ALUOut, Data, ALUResult, ImmExt, ResultSrc, Result);
+    // Register file
+    register_file rf (
+        .clk(clk),
+        .we(RegWrite),
+        .rs1(instr[19:15]),
+        .rs2(instr[24:20]),
+        .rd(instr[11:7]),
+        .wd(Result),
+        .rd1(RD1),
+        .rd2(RD2)
+    );
 
-// Memory path
-mux2 #(32) adrMux (
-    .a(PC),
-    .b(Result),
-    .sel(AdrSrc),
-    .out(Adr)
-);
-flopenr #(32) memFlop1(clk, reset, IRWrite, PC, OldPC); 
-flopenr #(32) memFlop2(clk, reset, IRWrite, ReadData, instr);
-flopr #(32) memDataFlop(clk, reset, ReadData, Data);
+    // Immediate extension
+    extend ext (
+        .instr(instr[31:7]),
+        .ImmSrc(ImmSrc),
+        .imm_out(ImmExt)
+    );
 
-// Aligned memory address
-assign aligned_address = 
-        (memwrite && instr[14:12] == 3'b010) ? {ALUOut[31:2], 2'b00} :  
-        (memwrite && instr[14:12] == 3'b001) ? {ALUOut[31:1], 1'b0} : 
-        ALUOut;
+    // Operand registers
+    flopr #(32) AReg(clk, reset, RD1, A);
+    flopr #(32) BReg(clk, reset, RD2, WriteData);
 
-// Removed: assign aluout = aligned_address;
+    // ALU operand selection
+    mux3 #(32) srcAmux (
+        .in0(PC),
+        .in1(OldPC),
+        .in2(A),
+        .sel(ALUSrcA),
+        .out(SrcA)
+    );
+
+    mux3 #(32) srcBmux (
+        .in0(WriteData),
+        .in1(ImmExt),
+        .in2(32'd4),
+        .sel(ALUSrcB),
+        .out(SrcB)
+    );
+
+    // ALU
+    alu alu (
+        .src1(SrcA),
+        .src2(SrcB),
+        .aluc(ALUControl),
+        .out(ALUResult),
+        .zero(Zero),
+        .cout(cout),
+        .overflow(overflow),
+        .sign(sign)
+    );
+
+    // ALU output register
+    flopr #(32) aluReg(clk, reset, ALUResult, ALUOut);
+
+    // Result selection
+    mux4 #(32) resultMux (
+        .in0(ALUOut),
+        .in1(Data),
+        .in2(ImmExt),
+        .in3(32'h0),
+        .sel(ResultSrc),
+        .out(Result)
+    );
+
+    // Address mux
+    mux2 #(32) adrMux (
+        .a(PC),
+        .b(aligned_address),
+        .sel(AdrSrc),
+        .out(Adr)
+    );
+
+    // IR and PC history registers
+    flopenr #(32) oldPcReg(clk, reset, IRWrite, PC, OldPC);
+    flopenr #(32) instrReg(clk, reset, IRWrite, ReadData, instr);
+    flopr   #(32) dataReg(clk, reset, ReadData, Data);
+
+    // Aligned address logic — now uses funct3 instead of instr[14:12]
+    always @* begin
+        case (funct3)
+            3'b000: aligned_address = ALUOut;                        // SB
+            3'b001: aligned_address = {ALUOut[31:1], 1'b0};          // SH
+            3'b010: aligned_address = {ALUOut[31:2], 2'b00};         // SW
+            default: aligned_address = ALUOut;
+        endcase
+    end
 
 endmodule

@@ -11,6 +11,7 @@ module top (
 );
 
     logic [31:0] ReadData;
+    logic [2:0]  funct3;  // Added funct3 signal
 
     rVMultiCycle rvMultiCycle (
         .clk(clk),
@@ -21,11 +22,10 @@ module top (
         .WriteData(WriteData)
     );
 
-    // memory module
     memory memory (
         .clk(clk),
         .write_mem(MemWrite),
-        .funct3(3'b010),  
+        .funct3(funct3),  // Now connected to processor's funct3
         .write_address(DataAdr),
         .write_data(WriteData),
         .read_address(DataAdr),
@@ -36,6 +36,6 @@ module top (
         .blue(leds[3])
     );
 
-  assign pwm_out = {leds, 28'd0}; // placeholder
-endmodule
+    assign pwm_out = {leds, 28'd0};
 
+endmodule
