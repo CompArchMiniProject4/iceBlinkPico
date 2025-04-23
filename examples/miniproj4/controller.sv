@@ -58,6 +58,18 @@ module controller(
         .bltu(bltu),
         .bgeu(bgeu)
     );
+	
+	// Immediate Source Assignment
+    always_comb begin
+        case (op)
+            7'b0010011, 7'b0000011, 7'b1100111: immsrc = 3'b000; // I-type
+            7'b0100011: immsrc = 3'b001;                         // S-type
+            7'b1100011: immsrc = 3'b010;                         // B-type
+            7'b0110111, 7'b0010111: immsrc = 3'b011;             // U-type
+            7'b1101111: immsrc = 3'b100;                         // J-type
+            default: immsrc = 3'b000;
+        endcase
+    end
 
     // PC Write Control Logic
     assign pcwrite = (beq & zero) |           // BEQ

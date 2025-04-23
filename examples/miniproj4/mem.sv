@@ -94,20 +94,6 @@ module memory #(
     logic [7:0] mem_read_data2;
     logic [7:0] mem_read_data3;
 
-    // Declare instruction memory array
-    logic [31:0] mem_array [0:255];
-
-    // Initialize instruction memory with test program
-    initial begin
-        // Initialize all memory to zero first
-        foreach (mem_array[i]) mem_array[i] = 32'd0;
-        
-        // Load test program if specified
-        if (INIT_FILE != "") begin
-            $readmemh({INIT_FILE, ".hex"}, mem_array);
-        end
-    end
-
     // Instantiate memory arrays with proper initialization
     memory_array #(
         .INIT_FILE      ((INIT_FILE != "") ? {INIT_FILE, "0.txt"} : ""),
