@@ -22,11 +22,12 @@ module tb();
 
   initial begin 
     clk = 0;
-    reset = 1;
+    reset = 0;
+    #5 reset = 1;
     #20 reset = 0;
     $dumpfile("tb.vcd");
     $dumpvars(0, tb);
-    #2000000  // 2 million time units = 2ms simulation
+    #2000000  //2ms simulation
     if(!error_flag) begin
       $display("Simulation succeeded: No errors detected");
       $display("Final LED state: %b", leds);
