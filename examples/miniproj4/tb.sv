@@ -20,32 +20,44 @@ module tb();
     .pwm_out(pwm_out)
   );
 
+  // Clock generation: 10ns period (100 MHz)
+  always #5 clk = ~clk;
+
+  // Reset pulse logic for synchronous reset
   initial begin 
     clk = 0;
     reset = 0;
-    #5 reset = 1;
-    #20 reset = 0;
+    #2;               // Let clock settle
+    @(negedge clk);   // Sync to clock edge
+    reset = 1;        // Synchronous reset assertion
+    @(negedge clk);   // Hold for 1 cycle
+    reset = 0;        // Deassert reset
+  end
+
+  // Simulation control
+  initial begin
     $dumpfile("tb.vcd");
     $dumpvars(0, tb);
-    #2000000  //2ms simulation
-    if(!error_flag) begin
-      $display("Simulation succeeded: No errors detected");
-      $display("Final LED state: %b", leds);
+
+    #2000000; // 2ms simulation
+
+    if (!error_flag) begin
+      $display("✅ Simulation succeeded: No errors detected");
+      $display("🟢 Final LED state: %b", leds);
     end
+
     $finish;
   end
 
-  always #5 clk = ~clk;  // 10ns period (100 MHz)
-
+  // Simple monitor for expected memory writes
   always @(negedge clk) begin
-    if(MemWrite) begin
-      if(DataAdr === 252) begin
-        if(WriteData === 0) begin
-          $display("ERROR: Test failed at time %0t", $time);
+    if (MemWrite) begin
+      if (DataAdr === 32'd252) begin
+        if (WriteData === 32'd0) begin
+          $display("❌ ERROR: Invalid zero write at %0t", $time);
           error_flag = 1;
-        end
-        else begin
-          $display("Unexpected write to address 252: %h", WriteData);
+        end else begin
+          $display("⚠️  Unexpected write to address 252: %h at %0t", WriteData, $time);
           error_flag = 1;
         end
         $finish;
