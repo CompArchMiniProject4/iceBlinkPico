@@ -10,7 +10,6 @@ module rVMultiCycle (
   output logic [2:0]  funct3
 );
 
-  // Internal signals
   logic [1:0] ALUSrcA, ALUSrcB, ResultSrc;
   logic [2:0] ImmSrc;
   logic [3:0] alucontrol;
@@ -18,20 +17,17 @@ module rVMultiCycle (
   logic       Zero, cout, overflow, sign;
   logic [31:0] Instr;
 
-  // Connect funct3 directly from instruction register
-  assign funct3 = Instr[14:12];
-
   controller c(
     .clk(clk),
     .reset(reset),
     .op(Instr[6:0]),
-    .funct3(Instr[14:12]),  // Single connection
+    .funct3(Instr[14:12]),
     .funct7b5(Instr[30]),
     .zero(Zero),
     .cout(cout),
     .overflow(overflow),
     .sign(sign),
-    .immsrc(ImmSrc),
+    .immsrc(ImmSrc),      // Now connected
     .alusrca(ALUSrcA),
     .alusrcb(ALUSrcB),
     .resultsrc(ResultSrc),
@@ -52,11 +48,11 @@ module rVMultiCycle (
     .RegWrite(regwrite),
     .ALUSrcA(ALUSrcA),
     .ALUSrcB(ALUSrcB),
-    .ImmSrc(ImmSrc),
+    .ImmSrc(ImmSrc),      // Connected here
     .AdrSrc(adrSrc),
     .PCWrite(pcwrite),
     .ReadData(ReadData),
-    .memwrite(MemWrite),
+    .memwrite(MemWrite),  // Lowercase if required
     .Zero(Zero),
     .cout(cout),
     .overflow(overflow),
