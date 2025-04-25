@@ -3,11 +3,11 @@ module fsm (
     input  logic [6:0]  op,
     output logic        branch, pcupdate, regwrite, memwrite, irwrite,
     output logic [1:0]  resultsrc, alusrcb, alusrca,
-    output logic        adrsrc,
+    output logic [1:0]  adrsrc,  // Changed from 1-bit to 2-bit
     output logic [1:0]  aluop
 );
 
-    // Use localparam instead of enum to avoid casting issues
+    // State definitions remain the same
     localparam S0  = 4'd0,
                S1  = 4'd1,
                S2  = 4'd2,
@@ -27,6 +27,7 @@ module fsm (
     logic [3:0] state, nextstate;
     wire op5 = op[5];
 
+    // State register remains the same
     always_ff @(posedge clk or posedge reset) begin
         if (reset)
             state <= S0;
@@ -34,9 +35,9 @@ module fsm (
             state <= nextstate;
     end
 
+    // Next state logic remains the same
     always_comb begin
         nextstate = S13;  // Default to error state
-
         case (state)
             S0:  nextstate = S1;
             S1: begin
@@ -80,7 +81,7 @@ module fsm (
         resultsrc  = 2'b00;
         alusrcb    = 2'b00;
         alusrca    = 2'b00;
-        adrsrc     = 1'b0;
+        adrsrc     = 2'b00;  // Default to PC (instruction fetch)
         aluop      = 2'b00;
 
         case (state)
@@ -88,66 +89,90 @@ module fsm (
                 pcupdate  = 1'b1;
                 irwrite   = 1'b1;
                 resultsrc = 2'b10;
-                alusrcb   = 2'b10;
-                alusrca   = 2'b00;
-                aluop     = 2'b00;
+                alusrcb   = 2'b10;  // PC+4 calculation
+                alusrca   = 2'b00;  // Use PC
+                adrsrc    = 2'b00;  // Address from PC (instruction fetch)
+                aluop     = 2'b00;  // ADD
             end
             S1: begin
-                alusrcb = 2'b01;
-                alusrca = 2'b01;
-                aluop   = 2'b00;
+                alusrcb = 2'b01;  // Register B
+                alusrca = 2'b01;  // Register A
+                adrsrc  = 2'b00;  // PC
+                aluop   = 2'b00;  // ADD
             end
             S2: begin
-                alusrcb = 2'b01;
-                alusrca = 2'b10;
-                aluop   = 2'b00;
+                alusrcb = 2'b01;  // Immediate for address calculation
+                alusrca = 2'b10;  // Base address from register
+                adrsrc  = 2'b00;  // PC
+                aluop   = 2'b00;  // ADD
             end
-            S3: adrsrc = 1'b1;
+            S3: begin
+                adrsrc = 2'b01;  // Use ALU result (load address)
+            end
             S4: begin
                 regwrite  = 1'b1;
-                resultsrc = 2'b01;
+                resultsrc = 2'b01;  
+                adrsrc    = 2'b01;  // Use ALU result
             end
             S5: begin
                 memwrite = 1'b1;
-                adrsrc   = 1'b1;
+                adrsrc   = 2'b01;  // Use ALU result
             end
             S6: begin
-                alusrca = 2'b10;
-                aluop   = 2'b10;
+                alusrca = 2'b10;  // Register A
+                adrsrc  = 2'b00;  // PC (not used here, but default)
+                aluop   = 2'b10;  // R-type operation
             end
-            S7: regwrite = 1'b1;
+            S7: begin
+                regwrite = 1'b1;
+                adrsrc   = 2'b00;  // Back to PC
+            end
             S8: begin
-                alusrca = 2'b10;
-                alusrcb = 2'b01;
-                aluop   = 2'b10;
+                alusrca = 2'b10;  // Register A
+                alusrcb = 2'b01;  // Immediate
+                adrsrc  = 2'b00;  // PC
+                aluop   = 2'b10;  // I-type operation
             end
             S9: begin
                 pcupdate  = 1'b1;
-                alusrca   = 2'b00;
-                alusrcb   = 2'b01;
-                aluop     = 2'b00;
-                resultsrc = 2'b10;
+                alusrca   = 2'b00;  // PC
+                alusrcb   = 2'b01;  // Immediate (offset)
+                adrsrc    = 2'b00;  // PC (for jump target calculation)
+                aluop     = 2'b00;  // ADD
+                resultsrc = 2'b10;  // PC+4
             end
             S10: begin
                 branch   = 1'b1;
-                alusrca  = 2'b10;
-                alusrcb  = 2'b01;
-                aluop    = 2'b01;
+                alusrca  = 2'b10;  // Register A
+                alusrcb  = 2'b01;  // Register B
+                adrsrc   = 2'b00;  // PC
+                aluop    = 2'b01;  // SUB for comparison
             end
             S11: begin
-                alusrca = 2'b01;
-                alusrcb = 2'b01;
-                aluop   = 2'b00;
+                alusrca = 2'b01;  // Not used (AUIPC)
+                alusrcb = 2'b01;  // Immediate
+                adrsrc  = 2'b00;  // PC
+                aluop   = 2'b00;  // ADD
             end
-            S12: resultsrc = 2'b11;
+            S12: begin
+                resultsrc = 2'b11;  // LUI result
+                adrsrc    = 2'b00;  // PC
+            end
             S14: begin
                 pcupdate  = 1'b1;
-                alusrca   = 2'b10;
-                alusrcb   = 2'b01;
-                aluop     = 2'b00;
-                resultsrc = 2'b10;
+                alusrca   = 2'b10;  // Register A (JALR)
+                alusrcb   = 2'b01;  // Immediate
+                adrsrc    = 2'b00;  // PC 
+                aluop     = 2'b00;  // ADD
+                resultsrc = 2'b10;  // PC+4
             end
         endcase
+    end
+    
+    always @(posedge clk) begin  // Not recommended for production code
+        if (state == S3 || state == S5) begin
+            $display("[%t] STATE=%d, adrsrc=%b", $time, state, adrsrc);
+        end
     end
 
 endmodule
