@@ -6,14 +6,15 @@ module rVMultiCycle (
   input  logic [31:0] ReadData,
   output logic [31:0] Adr,
   output logic        MemWrite,
-  output logic [31:0] WriteData,
+  output logic [31:0] WriteData
 );
 
   // Internal signals
   logic [1:0] ALUSrcA, ALUSrcB, ResultSrc;
   logic [2:0] ImmSrc;
   logic [3:0] alucontrol;
-  logic       adrSrc, irwrite, pcwrite, regwrite;
+  logic [1:0] adrSrc;
+  logic       irwrite, pcwrite, regwrite;
   logic       Zero, cout, overflow, sign;
   logic [31:0] Instr;
 
