@@ -21,7 +21,7 @@ module top (
         .Adr(DataAdr),           // To memory
         .MemWrite(MemWrite),     // To memory
         .WriteData(WriteData),   // To memory
-        .funct3(funct3)          // From instruction [14:12]
+        .funct3(funct3)
     );
 
     // Memory subsystem with I/O mapping
