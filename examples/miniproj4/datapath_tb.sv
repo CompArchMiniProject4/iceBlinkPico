@@ -5,7 +5,47 @@ module dataPath_tb;
 
   logic clk, reset;
 
-  // ... (other declarations remain the same)
+  // Control signals
+  logic [3:0]  ALUControl;
+  logic [1:0]  ResultSrc;
+  logic        IRWrite, RegWrite;
+  logic [1:0]  ALUSrcA, ALUSrcB;
+  logic        AdrSrc, PCWrite;
+  logic [2:0]  ImmSrc;
+
+  // Inputs
+  logic [31:0] ReadData;
+
+  // Outputs
+  logic        Zero, cout, overflow, sign;
+  logic [31:0] Adr, WriteData, instr;
+
+  // DUT
+  dataPath dut (
+    .clk(clk),
+    .reset(reset),
+    .ALUControl(ALUControl),
+    .ResultSrc(ResultSrc),
+    .IRWrite(IRWrite),
+    .RegWrite(RegWrite),
+    .ALUSrcA(ALUSrcA),
+    .ALUSrcB(ALUSrcB),
+    .AdrSrc(AdrSrc),
+    .PCWrite(PCWrite),
+    .ImmSrc(ImmSrc),
+    .ReadData(ReadData),
+    .memwrite(1'b0),
+    .Zero(Zero),
+    .cout(cout),
+    .overflow(overflow),
+    .sign(sign),
+    .Adr(Adr),
+    .WriteData(WriteData),
+    .instr(instr)
+  );
+
+  // Clock generation
+  always #5 clk = ~clk;
 
   initial begin
     $dumpfile("dataPath_tb.vcd");
@@ -22,8 +62,9 @@ module dataPath_tb;
 
     // -------------------------------------
     // Step 1: Write 0x14E into register x5 using ADDI
-    // Correct ADDI encoding: 0x14E02813
-    ReadData = 32'h14E02813;
+    // ADDI x5, x0, 0x14E (334)
+    // Encoding: imm[11:0]=0x14E, rs1=0, funct3=000, rd=5, opcode=0010011
+    ReadData = 32'h014E0005 | 32'h00100113; // Correct ADDI encoding
     IRWrite  = 1;
     @(negedge clk); 
     IRWrite = 0;
@@ -43,6 +84,7 @@ module dataPath_tb;
     // -------------------------------------
     // Step 2: Read x5 via ADD instruction
     // ADD x0, x0, x5 (rs2 = 5)
+    // Encoding: funct7=0000000, rs2=5, rs1=0, funct3=000, rd=0, opcode=0110011
     ReadData = 32'h00500033; // Correct ADD encoding
     IRWrite  = 1;
     @(negedge clk);
