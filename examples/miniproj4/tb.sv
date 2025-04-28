@@ -42,8 +42,8 @@ module tb();
     #2000000; // 2ms simulation
 
     if (!error_flag) begin
-      $display("✅ Simulation succeeded: No errors detected");
-      $display("🟢 Final LED state: %b", leds);
+      $display("Simulation succeeded: No errors detected");
+      $display("Final LED state: %b", leds);
     end
 
     $finish;
@@ -54,10 +54,10 @@ module tb();
     if (MemWrite) begin
       if (DataAdr === 32'd252) begin
         if (WriteData === 32'd0) begin
-          $display("❌ ERROR: Invalid zero write at %0t", $time);
+          $display("ERROR: Invalid zero write at %0t", $time);
           error_flag = 1;
         end else begin
-          $display("⚠️  Unexpected write to address 252: %h at %0t", WriteData, $time);
+          $display("Unexpected write to address 252: %h at %0t", WriteData, $time);
           error_flag = 1;
         end
         $finish;

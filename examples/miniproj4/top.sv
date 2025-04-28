@@ -20,15 +20,14 @@ module top (
         .ReadData(ReadData),     // From memory
         .Adr(DataAdr),           // To memory
         .MemWrite(MemWrite),     // To memory
-        .WriteData(WriteData),   // To memory
-        .funct3(funct3)          // From instruction [14:12]
+        .WriteData(WriteData)    // to memory
     );
 
     // Memory subsystem with I/O mapping
     memory memory (
         .clk(clk),
         .write_mem(MemWrite),    // Controlled by FSM
-        .funct3(funct3),         // For store size alignment
+        .funct3(funct3),        
         .write_address(DataAdr),
         .write_data(WriteData),
         .read_address(DataAdr),

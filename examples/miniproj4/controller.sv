@@ -11,7 +11,7 @@ module controller(
     output logic [2:0] immsrc,
     output logic [1:0] alusrca, alusrcb,
     output logic [1:0] resultsrc,
-    output logic       adrsrc,
+    output logic [1:0] adrsrc,
     output logic [3:0] alucontrol,
     output logic       irwrite, pcwrite,
     output logic       regwrite, memwrite
@@ -49,7 +49,7 @@ module controller(
 
     // Branch Type Decoder
     branchDec BranchDecoder(
-        .funct3(funct3),  // Now connected
+        .funct3(funct3), 
         .branch(branch),
         .beq(beq),
         .bne(bne),
@@ -74,10 +74,10 @@ module controller(
     // PC Write Control Logic
     assign pcwrite = (beq & zero) |           // BEQ
                     (bne & ~zero) |          // BNE
-                    (blt & (sign != overflow)) |  // BLT (signed)
-                    (bge & (sign == overflow)) |  // BGE (signed)
-                    (bltu & ~cout) |         // BLTU (unsigned)
-                    (bgeu & cout) |          // BGEU (unsigned)
-                    pcupdate;                // Normal PC update
+                    (blt & (sign != overflow)) |  // BLT
+                    (bge & (sign == overflow)) |  // BGE
+                    (bltu & ~cout) |         // BLTU
+                    (bgeu & cout) |          // BGEU 
+                    pcupdate;                //  PC update
 
 endmodule

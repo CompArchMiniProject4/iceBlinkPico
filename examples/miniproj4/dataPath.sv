@@ -14,7 +14,7 @@ module dataPath (
     input  logic        IRWrite,
     input  logic        RegWrite,
     input  logic [1:0]  ALUSrcA, ALUSrcB,
-    input  logic        AdrSrc,
+    input  logic [1:0]  AdrSrc,
     input  logic        PCWrite,
     input  logic [2:0]  ImmSrc,
     input  logic [31:0] ReadData,
@@ -32,6 +32,7 @@ module dataPath (
     logic [31:0] PC, OldPC;
     logic [31:0] aligned_address;
     logic [2:0]  funct3; // <-- Used instead of instr[14:12]
+    logic [31:0] mem_address;
 
     // Extract instr[14:12] safely outside procedural block
     assign funct3 = instr[14:12];
@@ -104,13 +105,13 @@ module dataPath (
         .out(Result)
     );
 
-    // Address mux
-    mux2 #(32) adrMux (
-        .a(PC),
-        .b(aligned_address),
-        .sel(AdrSrc),
-        .out(Adr)
-    );
+    always_comb begin
+        case (AdrSrc)
+            2'b00: Adr = PC;            // Fetch stage (PC → instruction read)
+            2'b01: Adr = ALUResult;     // Memory access (ALUResult → data read/write)
+            default: Adr = PC;          
+        endcase
+    end
 
     // IR and PC history registers
     flopenr #(32) oldPcReg(clk, reset, IRWrite, PC, OldPC);
