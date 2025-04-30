@@ -1,5 +1,5 @@
 filename = sine
-pcf_file = ../Comp_Arch/mp4github/iceBlinkPico/examples/final/board1.pcf
+pcf_file = board1.pcf
 
 build:
 	yosys -p "synth_ice40 -top top -json $(filename).json" $(filename).sv

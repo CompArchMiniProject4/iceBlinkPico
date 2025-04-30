@@ -1,3 +1,5 @@
+`include "spi.sv"
+`include "memory.sv"
 module top(
     input logic clk,
     input logic sclk,
