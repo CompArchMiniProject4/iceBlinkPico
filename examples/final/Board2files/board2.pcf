@@ -4,7 +4,7 @@
 set_io clk      20
 
 # Button input (used to trigger SPI send)
-set_io button   38      # BOOT switch repurposed
+set_io button   38      # SW button
 
 # SPI output signals to Board 1 (Slave)
 set_io sclk     18     # SPI clock output
