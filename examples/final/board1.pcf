@@ -1,0 +1,21 @@
+# iceBlinkPico PCF for Board 1 - SPI Slave + R-2R DAC output
+
+# System clock input (12 MHz)
+set_io clk      20
+
+# SPI interface inputs from Board 2 (Master)
+set_io sclk     18    # SPI clock
+set_io mosi     19    # SPI data in (MOSI)
+set_io cs_n     23    # SPI chip select (active low)
+
+# R-2R DAC output bits (10-bit waveform output)
+set_io _9b      3
+set_io _6a      2
+set_io _4a      48
+set_io _2a      47
+set_io _0a      46
+set_io _5a      45
+set_io _3b      44
+set_io _49a     43
+set_io _45a     37
+set_io _48b     36

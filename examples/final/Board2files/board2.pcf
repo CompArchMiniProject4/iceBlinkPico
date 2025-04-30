@@ -1,0 +1,12 @@
+# iceBlinkPico PCF for Board 2 - SPI Master
+
+# System clock input (12 MHz crystal oscillator)
+set_io clk      20
+
+# Button input (used to trigger SPI send)
+set_io button   9      # BOOT switch repurposed
+
+# SPI output signals to Board 1 (Slave)
+set_io sclk     18     # SPI clock output
+set_io mosi     19     # Master Out, Slave In
+set_io cs_n     23     # Active-low chip select
