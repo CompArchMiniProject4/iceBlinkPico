@@ -1,5 +1,7 @@
+`include "spi_master.sv"
+
 module top (
-    input  logic clk,         // 12 MHz
+    input  logic clk,         // 12 MHz input clock
     output logic sclk,
     output logic mosi,
     output logic cs_n,
@@ -9,8 +11,12 @@ module top (
     logic send, busy;
     logic [17:0] packet;
     logic [1:0] waveform_select = 2'b00;
-    logic [15:0] divider = 16'd5;
+    logic [15:0] divider = 16'd5;  // Adjust for desired waveform speed
 
+    // Temporary value for next waveform
+    logic [1:0] next_waveform;
+
+    // SPI Master instance
     spi_master u_spi_master (
         .clk(clk),
         .send(send),
@@ -21,7 +27,7 @@ module top (
         .busy(busy)
     );
 
-    // Debounce + rising edge detect
+    // ==== Button debounce and rising edge detection ====
     logic button_sync_0, button_sync_1;
     logic button_debounced;
     logic [19:0] debounce_counter = 0;
@@ -41,6 +47,7 @@ module top (
         button_debounced <= (debounce_counter == 20'd500_000);
     end
 
+    // Edge detection
     logic button_debounced_prev;
     logic rising_edge;
 
@@ -49,7 +56,7 @@ module top (
         rising_edge <= (button_debounced && !button_debounced_prev);
     end
 
-    // Cycle waveform + send packet
+    // ==== Waveform selector and SPI send control ====
     logic send_request;
 
     always_ff @(posedge clk) begin
@@ -61,8 +68,9 @@ module top (
         send <= (!busy && send_request);
 
         if (!busy && send_request) begin
-            waveform_select <= waveform_select + 1;
-            packet <= {divider, waveform_select};
+            next_waveform = waveform_select + 1;
+            waveform_select <= next_waveform;
+            packet <= {divider, next_waveform};
         end
     end
 
